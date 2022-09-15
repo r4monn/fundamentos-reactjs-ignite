@@ -1,6 +1,8 @@
 import { HandPalm, Play } from "phosphor-react";
-import { createContext, useEffect, useState } from "react";
-import { differenceInSeconds } from 'date-fns';
+import { useContext } from "react";
+import * as zod from 'zod'
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
   CountdownButton,
@@ -10,97 +12,58 @@ import {
 
 import { NewCycleForm } from "./components/NewCycleForm";
 import { Countdown } from "./components/Countdown";
+import { CyclesContext } from "../../contexts/CyclesContext";
 
-interface Cycle {
-  id: string,
-  task: string,
-  minutes: number,
-  startDate: Date,
-  interruptedDate?: Date,
-  finishedDate?: Date
-}
+const newCycleFormValidationSchema = zod.object({
+  task: zod.string().min(1, 'Dê um nome a sua tarefa'),
+  minutes: zod.number()
+    .min(5, 'O intervalo precisa ser de no mínimo 5 minutos.')
+    .max(60, 'O intervalo precisa ser de no máximo 60 minutos.'),
+})
 
-interface CyclesContextType {
-  activeCycle: Cycle | undefined
-  activeCycleId: string | null
-  markCurrentCycleAsFinished: () => void
-}
-
-export const CyclesContext = createContext({} as CyclesContextType)
+type newCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
 /* eslint-disable prettier/prettier */
 export function Home() {
 
-  const [cycles, setCycles] = useState<Cycle[]>([])
-  const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
+  const { activeCycle, createNewCycle, interruptCurrentCycle } = useContext(CyclesContext)
 
-  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);  // Verifica se tem ciclo/intervalo ativo
-
-  function markCurrentCycleAsFinished() {
-    setCycles((state) => state.map((cycle) => {
-      if (cycle.id === activeCycleId) {
-        return { ...cycle, finishedDate: new Date() }
-      } else {
-        return cycle
-      }
-    }),
-    )
-  }
-
-  /* function handleCreateNewCycle(data: newCycleFormData) {
-    const newCycle: Cycle = {
-      id: String(new Date().getTime()),  // Pega o horário em milisegundos
-      task: data.task,
-      minutes: data.minutes,
-      startDate: new Date(),
+  const newCycleForm = useForm<newCycleFormData>({
+    resolver: zodResolver(newCycleFormValidationSchema),
+    defaultValues: {
+      task: '',
+      minutes: 0,
     }
+  });
 
-    setCycles((state) => [...state, newCycle]);
-    setActiveCycleId(newCycle.id)
-    setAmountSecondsPassed(0)
+  const { handleSubmit, watch, /*reset*/ } = newCycleForm
 
-    reset();
-  } */
-
-  function handleInterruptCycle() {
-    setCycles(state => state.map((cycle) => {
-      if (cycle.id === activeCycleId) {
-        return { ...cycle, interruptedDate: new Date() }
-      } else {
-        return cycle;
-      }
-    }),
-    )
-    setActiveCycleId(null)
-  }
-
-  //const totalSeconds = activeCycle? activeCycle.minutes * 60 : 0;
-
-  //const task = watch('task');
-  //const isSubmitDisabled = !task;
+  const task = watch('task');
+  const isSubmitDisabled = !task;
 
   return (
     <HomeContainer>
-      <form /*onSubmit={handleSubmit(handleCreateNewCycle)}*/>
+      <form onSubmit={handleSubmit(createNewCycle)} >
 
-        <CyclesContext.Provider value={{ activeCycle, activeCycleId, markCurrentCycleAsFinished }}>
-          {/*<NewCycleForm />*/}
-          <Countdown />
-        </CyclesContext.Provider>
+        <FormProvider {...newCycleForm}>
+          <NewCycleForm />
+        </FormProvider>
+
+        <Countdown />
 
         {activeCycle ? (
-          <StopCountdownButton onClick={handleInterruptCycle} type="button">
+          <StopCountdownButton onClick={interruptCurrentCycle} type="button">
             <HandPalm size={24} />
             Interromper
           </StopCountdownButton>
         ) : (
-          <CountdownButton /*disabled={isSubmitDisabled}*/ type="submit">
+          <CountdownButton disabled={isSubmitDisabled} type="submit">
             <Play size={24} />
             Começar
           </CountdownButton>
         )}
 
       </form>
-    </HomeContainer>
+    </HomeContainer >
   )
 }
