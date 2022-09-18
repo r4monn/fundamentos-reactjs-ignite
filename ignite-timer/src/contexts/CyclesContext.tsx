@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useReducer, useState } from "react";
+import { createContext, ReactNode, useEffect, useReducer, useState } from "react";
 import { ActionTypes, addNewCycleAction, interruptCurrentCycleAction, markCurrentCycleAsFinishedAction } from "../reducers/cycles/actions";
 import { Cycle, cyclesReducer } from '../reducers/cycles/reducer'
 
@@ -33,9 +33,13 @@ export function CyclesContextProvider({ children }: CyclesContextProviderProps) 
 
   const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
 
+  useEffect(() => {
+    const stateJSON = JSON.stringify(cyclesState)
+
+    localStorage.setItem('@ignite-timer:cycles-state-1.0.0', stateJSON)
+  }, [cyclesState])
+
   const { cycles, activeCycleId } = cyclesState
-
-
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)  // Verifica se tem ciclo/intervalo ativo
 
   function setSecondsPassed(seconds: number) {
