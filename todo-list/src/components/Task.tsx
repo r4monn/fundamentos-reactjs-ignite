@@ -1,4 +1,3 @@
-import { ChangeEvent, useState } from 'react'
 import '../index.css'
 import { Trash } from 'phosphor-react'
 import { TaskIn } from '../interfaces/Interfaces';
