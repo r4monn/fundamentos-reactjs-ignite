@@ -1,4 +1,3 @@
-import '../index.css'
 import { Trash } from 'phosphor-react'
 import { TaskIn } from '../interfaces/Interfaces';
 
@@ -7,10 +6,6 @@ interface TaskProps {
   id: string;
   onDeleteTask: (taskId: string) => void;
   onCompleteTask: (taskId: string) => void;
-  /*tasks: TaskIn<[]>
-  deleteTask: () => void;
-  onCheckTask: (checkTaskById: string) => void;
-  onCompletedTasksCount: () => void;*/
 }
 
 function Task({ task, id, onDeleteTask, onCompleteTask }: TaskProps) {

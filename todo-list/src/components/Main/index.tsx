@@ -1,11 +1,12 @@
 import { useState, ChangeEvent, FormEvent, InvalidEvent } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { TaskIn } from "../interfaces/Interfaces";
-import ToDoList from "./ToDoList";
-import Task from "./Task";
+import { TaskIn } from "../../interfaces/Interfaces";
+import ToDoList from "../EmptyToDoList";
+import Task from "../Task";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { MainContainer, NewTaskContainer } from "./styles";
 
 export function Main() {
   const [tasks, setTasks] = useState<TaskIn[]>([
@@ -74,8 +75,8 @@ export function Main() {
     <>
       <ToastContainer autoClose={2500} pauseOnHover={false} theme={"dark"} />
 
-      <main>
-        <div className="newtask">
+      <MainContainer>
+        <NewTaskContainer>
           <form onSubmit={handleCreateNewTask}>
             <input
               type="text"
@@ -113,7 +114,7 @@ export function Main() {
               </svg>
             </button>
           </form>
-        </div>
+        </NewTaskContainer>
 
         <div className="tasks-title">
           <div>
@@ -140,7 +141,7 @@ export function Main() {
           ))}
           {tasks.length === 0 && <ToDoList />}
         </div>
-      </main>
+      </MainContainer>
     </>
   );
 }
